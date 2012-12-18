@@ -1,4 +1,4 @@
-﻿namespace VisualStudioHelperDownloader2012
+﻿namespace VisualStudioHelpDownloader2012
 {
     partial class MainForm
     {
