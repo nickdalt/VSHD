@@ -8,13 +8,13 @@
     <ProjectGuid>{2AE1E505-92AB-40DD-86D9-E47B307CEC94}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VisualStudioHelperDownloader2012</RootNamespace>
-    <AssemblyName>VisualStudioHelperDownloader2012</AssemblyName>
+    <RootNamespace>VisualStudioHelpDownloader2012</RootNamespace>
+    <AssemblyName>VisualStudioHelpDownloader2012</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
-    <StartupObject>VisualStudioHelperDownloader2012.Program</StartupObject>
+    <StartupObject>VisualStudioHelpDownloader2012.Program</StartupObject>
     <ApplicationManifest>Properties\App.manifest</ApplicationManifest>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Properties\Default.snk</AssemblyOriginatorKeyFile>
