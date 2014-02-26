@@ -154,9 +154,11 @@
 		/// <exception cref="InvalidOperationException">
 		/// If the data cannot be processed
 		/// </exception>
-		public ICollection<Locale> LoadAvailableLocales()
+		public ICollection<Locale> LoadAvailableLocales( int vsVersion )
 		{
-			return HelpIndexManager.LoadLocales( client.DownloadData( "catalogs/visualstudio11" ) );
+            string catalogPath = string.Format("catalogs/visualstudio{0}", vsVersion);
+            Debug.Print("Downloading locales list from {0}{1}", client.BaseAddress, catalogPath);
+            return HelpIndexManager.LoadLocales(client.DownloadData(catalogPath));
 		}
 
 		/// <summary>
@@ -187,7 +189,8 @@
 				throw new ArgumentNullException( "path" );
 			}
 
-			return HelpIndexManager.LoadBooks( client.DownloadData( path ) );
+            Debug.Print("Downloading books list from {0}{1}", client.BaseAddress, path);
+            return HelpIndexManager.LoadBooks(client.DownloadData(path));
 		}
 
 		/// <summary>
