@@ -6,7 +6,7 @@
 	using System.IO;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-
+    using System.Diagnostics;
 	/// <summary>
 	///     Main application form.
 	/// </summary>
@@ -26,6 +26,7 @@
 
 			Text = Application.ProductName;
 			products = new List<BookGroup>();
+			startupTip.Visible = false;
 			cacheDirectory.Text = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), "Downloads", "MSDN Library" );
 		}
 
@@ -55,26 +56,43 @@
 		protected override void OnLoad( EventArgs e )
 		{
 			base.OnLoad( e );
-			downloadProgress.Style = ProgressBarStyle.Marquee;
-			Task.Factory.StartNew(
-				() =>
-				{
-					using ( Downloader downloader = new Downloader() )
-					{
-						return downloader.LoadAvailableLocales();
-					}
-				} )
-			.ContinueWith(
-						t =>
-						{
-							languageSelection.DisplayMember = "Name";
-							t.Result.ForEach( x => languageSelection.Items.Add( x ) );
-							ClearBusyState();
-							startupTip.Visible = true;
-							languageSelection.SelectedIndex = 2; // DEBUG
-						},
-						TaskScheduler.FromCurrentSynchronizationContext() );
-		}
+            loadingBooksTip.Visible = false;
+            startupTip.Visible = true;
+        }
+
+        /// <summary>
+        /// Called to update the available locales for the selected version of visual studio
+        /// </summary>
+        private void UpdateLocales()
+        {
+            if ( vsVersion.SelectedIndex == -1 )
+            {
+                return;
+            }
+
+            loadingBooksTip.Visible = true;
+            startupTip.Visible = false;
+            languageSelection.Items.Clear();
+            downloadProgress.Style = ProgressBarStyle.Marquee;
+            Task.Factory.StartNew(
+                () =>
+                {
+                    using (Downloader downloader = new Downloader())
+                    {
+                        return downloader.LoadAvailableLocales( 11 + vsVersion.SelectedIndex );
+                    }
+                })
+            .ContinueWith(
+                        t =>
+                        {
+                            languageSelection.DisplayMember = "Name";
+                            t.Result.ForEach(x => languageSelection.Items.Add(x));
+                            ClearBusyState();
+                            startupTip.Visible = true;
+                            languageSelection.SelectedIndex = 2; // DEBUG
+                        },
+                        TaskScheduler.FromCurrentSynchronizationContext());
+        }
 
 		/// <summary>
 		/// Called when the download books button is clicked. Start downloading in a background thread
@@ -192,6 +210,7 @@
 		/// </summary>
 		private void ClearBusyState()
 		{
+			vsVersion.Enabled = true;
 			languageSelection.Enabled = true;
 			loadBooks.Enabled = true;
 			downloadBooks.Enabled = (booksList.Items.Count > 0) && !string.IsNullOrEmpty( cacheDirectory.Text );
@@ -206,6 +225,7 @@
 		/// </summary>
 		private void SetBusyState()
 		{
+			vsVersion.Enabled = false;
 			languageSelection.Enabled = false;
 			loadBooks.Enabled = false;
 			downloadBooks.Enabled = false;
@@ -228,7 +248,7 @@
 			{
 				foreach ( Book book in product.Books )
 				{
-					// Calcalate some details about any prospective download
+					// Calculate some details about any prospective download
 					long totalSize = 0;
 					long downloadSize = 0;
 					int packagesOutOfDate = 0;
@@ -319,5 +339,37 @@
 				book.Wanted = e.Item.Checked;
 			}
 		}
+
+		/// <summary>
+		/// Called when the language combobox selection is changed. Clear the
+		/// currently list of available books and reshow the instruction.
+		/// </summary>
+		/// <param name="sender">
+		/// The parameter is not used.
+		/// </param>
+		/// <param name="e">
+		/// The parameter is not used.
+		/// </param>
+		private void BookOptionsChanged( object sender, EventArgs e )
+		{
+			booksList.Items.Clear();
+			downloadBooks.Enabled = false;
+			startupTip.Visible = true;
+        }
+
+        /// <summary>
+        /// Called when the visual studio language combobox selection is changed. Clear the
+        /// currently list of available books and reshow the instruction.
+        /// </summary>
+        /// <param name="sender">
+        /// The parameter is not used.
+        /// </param>
+        /// <param name="e">
+        /// The parameter is not used.
+        /// </param>
+        private void VsVersionChanged(object sender, EventArgs e)
+        {
+            UpdateLocales();
+        }
 	}
 }
