@@ -154,9 +154,9 @@
 		/// <exception cref="InvalidOperationException">
 		/// If the data cannot be processed
 		/// </exception>
-		public ICollection<Locale> LoadAvailableLocales( int vsVersion )
+		public ICollection<Locale> LoadAvailableLocales( string vsVersion )
 		{
-            string catalogPath = string.Format("catalogs/visualstudio{0}", vsVersion);
+            string catalogPath = string.Format("catalogs/{0}", vsVersion);
             Debug.Print("Downloading locales list from {0}{1}", client.BaseAddress, catalogPath);
             return HelpIndexManager.LoadLocales(client.DownloadData(catalogPath));
 		}

@@ -70,6 +70,8 @@
                 return;
             }
 
+            string[] vsVersions = { "visualstudio11", "visualstudio12", "dev14" };
+            string version = vsVersions[vsVersion.SelectedIndex];
             loadingBooksTip.Visible = true;
             startupTip.Visible = false;
             languageSelection.Items.Clear();
@@ -79,7 +81,7 @@
                 {
                     using (Downloader downloader = new Downloader())
                     {
-                        return downloader.LoadAvailableLocales( 11 + vsVersion.SelectedIndex );
+                        return downloader.LoadAvailableLocales( version );
                     }
                 })
             .ContinueWith(
@@ -89,7 +91,6 @@
                             t.Result.ForEach(x => languageSelection.Items.Add(x));
                             ClearBusyState();
                             startupTip.Visible = true;
-                            languageSelection.SelectedIndex = 2; // DEBUG
                         },
                         TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -369,6 +370,9 @@
         /// </param>
         private void VsVersionChanged(object sender, EventArgs e)
         {
+            booksList.Items.Clear();
+            languageSelection.Items.Clear();
+            languageSelection.SelectedItem = -1;
             UpdateLocales();
         }
 	}
