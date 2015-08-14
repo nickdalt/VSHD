@@ -8,8 +8,8 @@
     <ProjectGuid>{2AE1E505-92AB-40DD-86D9-E47B307CEC94}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VisualStudioHelpDownloader2012</RootNamespace>
-    <AssemblyName>VisualStudioHelpDownloader2012</AssemblyName>
+    <RootNamespace>VisualStudioHelpDownloader</RootNamespace>
+    <AssemblyName>VisualStudioHelpDownloader</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
