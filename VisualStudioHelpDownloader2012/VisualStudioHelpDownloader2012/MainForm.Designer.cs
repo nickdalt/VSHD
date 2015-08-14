@@ -241,7 +241,8 @@
             this.vsVersion.FormattingEnabled = true;
             this.vsVersion.Items.AddRange(new object[] {
             "2012",
-            "2013"});
+            "2013",
+            "2015"});
             this.vsVersion.Location = new System.Drawing.Point(144, 352);
             this.vsVersion.Name = "vsVersion";
             this.vsVersion.Size = new System.Drawing.Size(74, 23);
