@@ -48,14 +48,14 @@
 					XElement element = XDocument.Load( settingsFile ).Root;
 					if ( element != null )
 					{
-						element = element.Elements().Single( x => x.Name.LocalName == "proxy" );
-						WebProxy proxy = new WebProxy( element.Attributes().Single( x => x.Name.LocalName == "address" ).Value )
+						element = element.Elements().Single( x => x.Name.LocalName?.Equals( "proxy", StringComparison.OrdinalIgnoreCase ) ?? false );
+						WebProxy proxy = new WebProxy( element.Attributes().Single( x => x.Name.LocalName?.Equals( "address", StringComparison.OrdinalIgnoreCase ) ?? false ).Value )
 						{
 							Credentials =
 								new NetworkCredential(
-								element.Attributes().Single( x => x.Name.LocalName == "login" ).Value,
-								element.Attributes().Single( x => x.Name.LocalName == "password" ).Value,
-								element.Attributes().Single( x => x.Name.LocalName == "domain" ).Value )
+								element.Attributes().Single( x => x.Name.LocalName?.Equals( "login", StringComparison.OrdinalIgnoreCase ) ?? false ).Value,
+								element.Attributes().Single( x => x.Name.LocalName?.Equals( "password", StringComparison.OrdinalIgnoreCase ) ?? false ).Value,
+								element.Attributes().Single( x => x.Name.LocalName?.Equals( "domain", StringComparison.OrdinalIgnoreCase ) ?? false ).Value )
 						};
 
 						client.Proxy = proxy;
@@ -156,9 +156,23 @@
 		/// </exception>
 		public ICollection<Locale> LoadAvailableLocales( string vsVersion )
 		{
-            string catalogPath = string.Format("catalogs/{0}", vsVersion);
-            Debug.Print("Downloading locales list from {0}{1}", client.BaseAddress, catalogPath);
-            return HelpIndexManager.LoadLocales(client.DownloadData(catalogPath));
+			// FIXME: Locales are not currently present for VS2017
+			if (vsVersion.Equals("dev15", StringComparison.OrdinalIgnoreCase))
+			{
+				vsVersion = "dev14";
+			}
+
+			string catalogPath = string.Format("catalogs/{0}", vsVersion);
+			Debug.Print("Downloading locales list from {0}{1}", client.BaseAddress, catalogPath);
+			ICollection<Locale> locales = HelpIndexManager.LoadLocales(client.DownloadData(catalogPath));
+
+			// FIXME: The path for the locales is pointing VS2015 docs due the fix above, fix them to point to VS2017
+			foreach ( Locale l in locales )
+			{
+				l.CatalogLink = l.CatalogLink.Replace("dev14", "dev15");
+			}
+
+			return locales;
 		}
 
 		/// <summary>
@@ -189,8 +203,8 @@
 				throw new ArgumentNullException( "path" );
 			}
 
-            Debug.Print("Downloading books list from {0}{1}", client.BaseAddress, path);
-            return HelpIndexManager.LoadBooks(client.DownloadData(path));
+			Debug.Print("Downloading books list from {0}{1}", client.BaseAddress, path);
+			return HelpIndexManager.LoadBooks(client.DownloadData(path));
 		}
 
 		/// <summary>
