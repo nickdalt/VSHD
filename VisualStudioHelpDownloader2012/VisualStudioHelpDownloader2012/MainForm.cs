@@ -6,7 +6,7 @@
 	using System.IO;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-    using System.Diagnostics;
+	using System.Diagnostics;
 	/// <summary>
 	///     Main application form.
 	/// </summary>
@@ -56,44 +56,44 @@
 		protected override void OnLoad( EventArgs e )
 		{
 			base.OnLoad( e );
-            loadingBooksTip.Visible = false;
-            startupTip.Visible = true;
-        }
+			loadingBooksTip.Visible = false;
+			startupTip.Visible = true;
+		}
 
-        /// <summary>
-        /// Called to update the available locales for the selected version of visual studio
-        /// </summary>
-        private void UpdateLocales()
-        {
-            if ( vsVersion.SelectedIndex == -1 )
-            {
-                return;
-            }
+		/// <summary>
+		/// Called to update the available locales for the selected version of visual studio
+		/// </summary>
+		private void UpdateLocales()
+		{
+			if ( vsVersion.SelectedIndex == -1 )
+			{
+				return;
+			}
 
-            string[] vsVersions = { "visualstudio11", "visualstudio12", "dev14" };
-            string version = vsVersions[vsVersion.SelectedIndex];
-            loadingBooksTip.Visible = true;
-            startupTip.Visible = false;
-            languageSelection.Items.Clear();
-            downloadProgress.Style = ProgressBarStyle.Marquee;
-            Task.Factory.StartNew(
-                () =>
-                {
-                    using (Downloader downloader = new Downloader())
-                    {
-                        return downloader.LoadAvailableLocales( version );
-                    }
-                })
-            .ContinueWith(
-                        t =>
-                        {
-                            languageSelection.DisplayMember = "Name";
-                            t.Result.ForEach(x => languageSelection.Items.Add(x));
-                            ClearBusyState();
-                            startupTip.Visible = true;
-                        },
-                        TaskScheduler.FromCurrentSynchronizationContext());
-        }
+			string[] vsVersions = { "visualstudio11", "visualstudio12", "dev14", "dev15" };
+			string version = vsVersions[vsVersion.SelectedIndex];
+			loadingBooksTip.Visible = true;
+			startupTip.Visible = false;
+			languageSelection.Items.Clear();
+			downloadProgress.Style = ProgressBarStyle.Marquee;
+			Task.Factory.StartNew(
+				() =>
+				{
+					using (Downloader downloader = new Downloader())
+					{
+						return downloader.LoadAvailableLocales( version );
+					}
+				})
+			.ContinueWith(
+						t =>
+						{
+							languageSelection.DisplayMember = "Name";
+							t.Result.ForEach(x => languageSelection.Items.Add(x));
+							ClearBusyState();
+							startupTip.Visible = true;
+						},
+						TaskScheduler.FromCurrentSynchronizationContext());
+		}
 
 		/// <summary>
 		/// Called when the download books button is clicked. Start downloading in a background thread
@@ -356,24 +356,24 @@
 			booksList.Items.Clear();
 			downloadBooks.Enabled = false;
 			startupTip.Visible = true;
-        }
+		}
 
-        /// <summary>
-        /// Called when the visual studio language combobox selection is changed. Clear the
-        /// currently list of available books and reshow the instruction.
-        /// </summary>
-        /// <param name="sender">
-        /// The parameter is not used.
-        /// </param>
-        /// <param name="e">
-        /// The parameter is not used.
-        /// </param>
-        private void VsVersionChanged(object sender, EventArgs e)
-        {
-            booksList.Items.Clear();
-            languageSelection.Items.Clear();
-            languageSelection.SelectedItem = -1;
-            UpdateLocales();
-        }
+		/// <summary>
+		/// Called when the visual studio language combobox selection is changed. Clear the
+		/// currently list of available books and reshow the instruction.
+		/// </summary>
+		/// <param name="sender">
+		/// The parameter is not used.
+		/// </param>
+		/// <param name="e">
+		/// The parameter is not used.
+		/// </param>
+		private void VsVersionChanged(object sender, EventArgs e)
+		{
+			booksList.Items.Clear();
+			languageSelection.Items.Clear();
+			languageSelection.SelectedItem = -1;
+			UpdateLocales();
+		}
 	}
 }

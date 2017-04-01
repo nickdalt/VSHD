@@ -50,15 +50,15 @@
 			{
 				IEnumerable<XElement> query =
 					document.Root.Elements()
-							.Where( x => x.GetClassName() == "catalogLocales" )
+							.Where( x => x.GetClassName()?.Equals( "catalogLocales", StringComparison.OrdinalIgnoreCase ) ?? false )
 							.Take( 1 )
 							.Single()
 							.Elements()
-							.Where( x => x.GetClassName() == "catalog-locale-list" )
+							.Where( x => x.GetClassName()?.Equals( "catalog-locale-list", StringComparison.OrdinalIgnoreCase ) ?? false )
 							.Take( 1 )
 							.Single()
 							.Elements()
-							.Where( x => x.GetClassName() == "catalog-locale" );
+							.Where( x => x.GetClassName()?.Equals( "catalog-locale", StringComparison.OrdinalIgnoreCase ) ?? false );
 
 				result.AddRange(
 					query.Select(
@@ -114,15 +114,15 @@
 			{
 				IEnumerable<XElement> groups =
 					document.Root.Elements()
-							.Where( x => x.GetClassName() == "book-list" )
+							.Where( x => x.GetClassName()?.Equals( "book-list", StringComparison.OrdinalIgnoreCase ) ?? false )
 							.Take( 1 )
 							.Single()
 							.Elements()
-							.Where( x => x.GetClassName() == "book-groups" )
+							.Where( x => x.GetClassName()?.Equals( "book-groups", StringComparison.OrdinalIgnoreCase ) ?? false )
 							.Take( 1 )
 							.Single()
 							.Elements()
-							.Where( x => x.GetClassName() == "book-group" );
+							.Where( x => x.GetClassName()?.Equals( "book-group", StringComparison.OrdinalIgnoreCase ) ?? false );
 				foreach ( XElement group in groups )
 				{
 					BookGroup bookGroup = new BookGroup
@@ -136,20 +136,20 @@
 
 					result.Add( bookGroup );
 
-					IEnumerable<XElement> books = group.Elements().Where( x => x.GetClassName() == "book" );
+					IEnumerable<XElement> books = group.Elements().Where( x => x.GetClassName()?.Equals( "book", StringComparison.OrdinalIgnoreCase ) ?? false );
 					foreach ( XElement book in books )
 					{
 						XElement path =
 							book.Elements()
-								.Where( x => x.GetClassName() == "properties" )
+								.Where( x => x.GetClassName()?.Equals( "properties", StringComparison.OrdinalIgnoreCase ) ?? false )
 								.Take( 1 )
 								.Single()
 								.Elements()
-								.Where( x => x.GetClassName() == "paths" )
+								.Where( x => x.GetClassName()?.Equals( "paths", StringComparison.OrdinalIgnoreCase ) ?? false )
 								.Take( 1 )
 								.Single()
 								.Elements()
-								.Where( x => x.GetClassName() == "path" )
+								.Where( x => x.GetClassName()?.Equals( "path", StringComparison.OrdinalIgnoreCase ) ?? false )
 								.Take( 1 )
 								.Single();
 						string bookPath = path.GetChildClassValue( "name" ).TrimStart( new[] { '\\' } );
@@ -168,11 +168,11 @@
 						bookGroup.Books.Add( b );
 						IEnumerable<XElement> packages =
 							book.Elements()
-								.Where( x => x.GetClassName() == "packages" )
+								.Where( x => x.GetClassName()?.Equals( "packages", StringComparison.OrdinalIgnoreCase ) ?? false )
 								.Take( 1 )
 								.Single()
 								.Elements()
-								.Where( x => x.GetClassName() == "package" );
+								.Where( x => x.GetClassName()?.Equals( "package" , StringComparison.OrdinalIgnoreCase ) ?? false );
 						foreach ( XElement package in packages )
 						{
 							Package p = new Package
@@ -443,7 +443,7 @@
 		/// </exception>
 		private static string GetChildClassValue( this XElement element, string name )
 		{
-			XElement result = element.Elements().Where( x => x.GetClassName() == name ).Take( 1 ).Single();
+			XElement result = element.Elements().Where( x => x.GetClassName()?.Equals( name, StringComparison.OrdinalIgnoreCase ) ?? false  ).Take( 1 ).Single();
 
 			return null != result ? result.Value : null;
 		}
@@ -469,7 +469,7 @@
 		/// </exception>
 		private static string GetChildClassAttributeValue( this XElement element, string name, string attribute )
 		{
-			XElement result = element.Elements().Where( x => x.GetClassName() == name ).Take( 1 ).Single();
+			XElement result = element.Elements().Where( x => x.GetClassName()?.Equals( name, StringComparison.OrdinalIgnoreCase ) ?? false ).Take( 1 ).Single();
 
 			return null != result ? result.GetAttributeValue( attribute ) : null;
 		}
