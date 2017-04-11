@@ -107,8 +107,7 @@
 				{
 					foreach ( Package package in book.Packages )
 					{
-						string packagePath = Path.Combine( cachePath, "Packages", package.Name );
-						packagePath = Path.ChangeExtension( packagePath, ".cab" );
+						string packagePath = Path.Combine( cachePath, "Packages", package.Name + ".cab" );
 						FileInfo packageFile = new FileInfo( packagePath );
 						if ( packageFile.Exists )
 						{

@@ -178,7 +178,7 @@
 							Package p = new Package
 											{
 												LastModified = DateTime.Parse( package.GetChildClassValue( "last-modified" ), CultureInfo.InvariantCulture ),
-												Link = package.GetChildClassValue( "current-link" ),
+												Link = package.GetChildClassAttributeValue( "current-link", "href" ),
 												Tag = package.GetChildClassValue( "package-etag" ),
 												Name = package.GetChildClassValue( "name" ),
 												Size = long.Parse( package.GetChildClassValue( "package-size-bytes" ), CultureInfo.InvariantCulture )
