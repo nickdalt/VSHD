@@ -320,7 +320,7 @@
 			XElement brandingPackageElement2 = CreateElement( "a", "branding-package-link", null );
 			XElement productLinkElement = CreateElement( "a", "product-link", null );
 
-			productLinkElement.SetAttributeValue( XName.Get( "href", string.Empty ), bookGroup.CreateFileName() );
+			productLinkElement.SetAttributeValue( XName.Get( "href", string.Empty ), Uri.EscapeDataString(bookGroup.CreateFileName()) );
 
 			detailsElement.Add(
 				CreateElement( "span", "name", book.Name ), 
@@ -339,7 +339,7 @@
 
 				linkElement.SetAttributeValue(
 					XName.Get( "href", string.Empty ), 
-					string.Format( CultureInfo.InvariantCulture, @"Packages\{0}", package.CreateFileName() ) );
+					string.Format( CultureInfo.InvariantCulture, @"Packages\{0}", Uri.EscapeDataString(package.CreateFileName()) ) );
 
 				packageElement.Add(
 					CreateElement( "span", "name", package.Name ), 
