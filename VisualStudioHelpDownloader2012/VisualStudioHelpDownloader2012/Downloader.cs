@@ -319,10 +319,24 @@
 				{
 					Debug.Print( "         Downloading : '{0}' to '{1}'", package.Link, targetFileName );
 					client.DownloadFile( package.Link, targetFileName );
+					using (FileStream s = File.Open(targetFileName, FileMode.Append))
+					{
+						s.Write(new byte[1], 0, 1);
+					}
 
-					File.SetCreationTime( targetFileName, package.LastModified );
-					File.SetLastAccessTime( targetFileName, package.LastModified );
-					File.SetLastWriteTime( targetFileName, package.LastModified );
+					if (AuthenticodeTools.IsTrusted(targetFileName))
+					{
+						File.SetCreationTime(targetFileName, package.LastModified);
+						File.SetLastAccessTime(targetFileName, package.LastModified);
+						File.SetLastWriteTime(targetFileName, package.LastModified);
+					}
+					else
+					{
+						Debug.Print("The signature on '{0}' is not valid - deleting");
+						File.Delete(targetFileName);
+						
+						throw new InvalidDataException($"The signature on '{targetFileName}' is not valid - deleting");
+					}
 				}
 
 				progress.Report( 100 * ++packagesCountCurrent / packages.Count );
