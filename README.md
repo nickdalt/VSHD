@@ -7,7 +7,7 @@ Tool for downloading the Visual Studio 2012/2013/2015/2017 help packages for off
 
 ## Overview
 
-Allows Visual Studio 2012/2013/2015/2017 packages to be downloaded to an offline cache location before importing them into Microsoft Help Viewer 2.0/2.1/2.2. 
+Allows Visual Studio 2012/2013/2015/2017 packages to be downloaded to an offline cache location before importing them into Microsoft Help Viewer 2.0/2.1/2.2/2.3. 
 
 If the cache is kept following the import, then only changes will be downloaded on subsequent occasions.
  

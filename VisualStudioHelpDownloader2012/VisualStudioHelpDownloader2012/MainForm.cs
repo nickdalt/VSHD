@@ -72,8 +72,8 @@
 
 			string[] vsVersions = { "visualstudio11", "visualstudio12", "dev14", "dev15" };
 			string version = vsVersions[vsVersion.SelectedIndex];
-			loadingBooksTip.Visible = true;
 			startupTip.Visible = false;
+			SetBusyState();
 			languageSelection.Items.Clear();
 			downloadProgress.Style = ProgressBarStyle.Marquee;
 			Task.Factory.StartNew(
@@ -169,7 +169,6 @@
 			SetBusyState();
 			downloadProgress.Style = ProgressBarStyle.Marquee;
 			startupTip.Visible = false;
-			loadingBooksTip.Visible = true;
 
 			Task.Factory.StartNew(
 				() =>
@@ -219,6 +218,7 @@
 			downloadProgress.Style = ProgressBarStyle.Continuous;
 			startupTip.Visible = false;
 			loadingBooksTip.Visible = false;
+			booksList.Enabled = true;
 		}
 
 		/// <summary>
@@ -231,6 +231,8 @@
 			loadBooks.Enabled = false;
 			downloadBooks.Enabled = false;
 			browseDirectory.Enabled = false;
+			booksList.Enabled = false;
+			loadingBooksTip.Visible = true;
 		}
 
 		/// <summary>
