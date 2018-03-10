@@ -41,10 +41,10 @@
 				throw new ArgumentNullException( "data" );
 			}
 
-			using ( MemoryStream stream = new MemoryStream( data ) )
-			{
-				document = XDocument.Load( stream );
-			}
+            // This would normally be loaded directly from the bytes but the MS server
+            // seems to be returning junk whitespace at the start that cant be loaded
+            // directly as XML
+			document = XDocument.Parse( System.Text.Encoding.UTF8.GetString(data).TrimStart() );
 
 			if ( document.Root != null )
 			{

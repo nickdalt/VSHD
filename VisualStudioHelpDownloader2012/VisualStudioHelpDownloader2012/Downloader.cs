@@ -155,17 +155,10 @@
 		/// </exception>
 		public ICollection<Locale> LoadAvailableLocales( string vsVersion )
 		{
-			// FIXME: Locales are not currently present for VS2017
-			if (vsVersion.Equals("dev15", StringComparison.OrdinalIgnoreCase))
-			{
-				vsVersion = "dev14";
-			}
-
 			string catalogPath = string.Format("catalogs/{0}", vsVersion);
 			Debug.Print("Downloading locales list from {0}{1}", client.BaseAddress, catalogPath);
 			ICollection<Locale> locales = HelpIndexManager.LoadLocales(client.DownloadData(catalogPath));
 
-			// FIXME: The path for the locales is pointing VS2015 docs due the fix above, fix them to point to VS2017
 			foreach ( Locale l in locales )
 			{
 				l.CatalogLink = l.CatalogLink.Replace("dev14", "dev15");
