@@ -319,10 +319,6 @@
 				{
 					Debug.Print( "         Downloading : '{0}' to '{1}'", package.Link, targetFileName );
 					client.DownloadFile( package.Link, targetFileName );
-					using (FileStream s = File.Open(targetFileName, FileMode.Append))
-					{
-						s.Write(new byte[1], 0, 1);
-					}
 
 					if (AuthenticodeTools.IsTrusted(targetFileName))
 					{
