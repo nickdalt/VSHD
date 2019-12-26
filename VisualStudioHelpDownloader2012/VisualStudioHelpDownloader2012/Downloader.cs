@@ -9,7 +9,8 @@
 	using System.Net;
 	using System.Reflection;
 	using System.Text;
-	using System.Windows.Forms;
+    using System.Threading.Tasks;
+    using System.Windows.Forms;
 	using System.Xml;
 	using System.Xml.Linq;
 
@@ -34,7 +35,7 @@
 		/// </exception>
 		public Downloader()
 		{
-			client.BaseAddress = "http://services.mtps.microsoft.com/serviceapi/";
+			client.BaseAddress = "https://services.mtps.microsoft.com/serviceapi/";
 
 			string directory = Path.GetDirectoryName( Application.ExecutablePath );
 			if ( directory != null )
@@ -153,17 +154,11 @@
 		/// <exception cref="InvalidOperationException">
 		/// If the data cannot be processed
 		/// </exception>
-		public ICollection<Locale> LoadAvailableLocales( string vsVersion )
+		public async Task<ICollection<Locale>> LoadAvailableLocalesAsync( string vsVersion )
 		{
 			string catalogPath = string.Format("catalogs/{0}", vsVersion);
 			Debug.Print("Downloading locales list from {0}{1}", client.BaseAddress, catalogPath);
-			ICollection<Locale> locales = HelpIndexManager.LoadLocales(client.DownloadData(catalogPath));
-
-			foreach ( Locale l in locales )
-			{
-				l.CatalogLink = l.CatalogLink.Replace("dev14", "dev15");
-			}
-
+			ICollection<Locale> locales = HelpIndexManager.LoadLocales( await client.DownloadDataTaskAsync( catalogPath ) );
 			return locales;
 		}
 
@@ -188,7 +183,7 @@
 		/// <exception cref="InvalidOperationException">
 		/// If the data cannot be processed
 		/// </exception>
-		public ICollection<BookGroup> LoadBooksInformation( string path )
+		public async Task<ICollection<BookGroup>> LoadBooksInformationAsync( string path )
 		{
 			if ( path == null )
 			{
@@ -196,7 +191,7 @@
 			}
 
 			Debug.Print("Downloading books list from {0}{1}", client.BaseAddress, path);
-			return HelpIndexManager.LoadBooks(client.DownloadData(path));
+			return HelpIndexManager.LoadBooks( await client.DownloadDataTaskAsync( path ) );
 		}
 
 		/// <summary>
@@ -230,7 +225,7 @@
 		/// <exception cref="InvalidOperationException">
 		/// If the data cannot be processed
 		/// </exception>
-		public void DownloadBooks( ICollection<BookGroup> bookGroups, string cachePath, IProgress<int> progress )
+		public async Task DownloadBooksAsync( ICollection<BookGroup> bookGroups, string cachePath, IProgress<int> progress )
 		{
 			if ( bookGroups == null )
 			{
@@ -311,14 +306,14 @@
 
 			// Download the packages
 			int packagesCountCurrent = 0;
-			client.BaseAddress = "http://packages.mtps.microsoft.com/";
+			client.BaseAddress = "https://packages.mtps.microsoft.com/";
 			foreach ( Package package in packages.Values )
 			{
 				string targetFileName = Path.Combine( targetDirectory, package.CreateFileName() );
 				if ( package.State == PackageState.NotDownloaded || package.State == PackageState.OutOfDate )
 				{
 					Debug.Print( "         Downloading : '{0}' to '{1}'", package.Link, targetFileName );
-					client.DownloadFile( package.Link, targetFileName );
+					await client.DownloadFileTaskAsync( package.Link, targetFileName );
 
 					if (AuthenticodeTools.IsTrusted(targetFileName))
 					{

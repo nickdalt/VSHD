@@ -63,7 +63,7 @@
 		/// <summary>
 		/// Called to update the available locales for the selected version of visual studio
 		/// </summary>
-		private void UpdateLocales()
+		private async Task UpdateLocalesAsync()
 		{
 			if ( vsVersion.SelectedIndex == -1 )
 			{
@@ -76,23 +76,29 @@
 			SetBusyState();
 			languageSelection.Items.Clear();
 			downloadProgress.Style = ProgressBarStyle.Marquee;
-			Task.Factory.StartNew(
-				() =>
+
+			try
+			{
+				using (Downloader downloader = new Downloader())
 				{
-					using (Downloader downloader = new Downloader())
-					{
-						return downloader.LoadAvailableLocales( version );
-					}
-				})
-			.ContinueWith(
-						t =>
-						{
-							languageSelection.DisplayMember = "Name";
-							t.Result.ForEach(x => languageSelection.Items.Add(x));
-							ClearBusyState();
-							startupTip.Visible = true;
-						},
-						TaskScheduler.FromCurrentSynchronizationContext());
+					(await downloader.LoadAvailableLocalesAsync(version)).ForEach(x => languageSelection.Items.Add(x));
+				}
+			}
+			catch ( Exception ex )
+			{
+				MessageBox.Show(
+					$"Locales update failed - {ex.Message}",
+					Application.ProductName,
+					MessageBoxButtons.OK,
+					MessageBoxIcon.Error,
+					MessageBoxDefaultButton.Button1,
+					0);
+			}
+			finally
+			{
+				ClearBusyState();
+				startupTip.Visible = true;
+			}
 		}
 
 		/// <summary>
@@ -104,52 +110,43 @@
 		/// <param name="e">
 		/// The parameter is not used.
 		/// </param>
-		private void DownloadBooksClick( object sender, EventArgs e )
+		private async void DownloadBooksClick( object sender, EventArgs e )
 		{
 			SetBusyState();
 			downloadProgress.Style = ProgressBarStyle.Continuous;
 			downloadProgress.Value = 0;
-			Task.Factory.StartNew(
-				() =>
-					{
-						using ( Downloader downloader = new Downloader() )
-						{
-							downloader.DownloadBooks( products, cacheDirectory.Text, this );
-						}
-					} )
-			.ContinueWith(
-						t =>
-							{
-								if ( t.Status == TaskStatus.Faulted )
-								{
-									string message = string.Format(
-										CultureInfo.CurrentCulture,
-										"Download failed - {0}",
-										t.Exception == null ? "Unknown error" : t.Exception.GetBaseException().Message );
-									MessageBox.Show(
-										message,
-										Application.ProductName,
-										MessageBoxButtons.OK,
-										MessageBoxIcon.Error,
-										MessageBoxDefaultButton.Button1,
-										0 );
-								}
-								else
-								{
-									MessageBox.Show(
-										"Download completed successfully",
-										Application.ProductName,
-										MessageBoxButtons.OK,
-										MessageBoxIcon.Information,
-										MessageBoxDefaultButton.Button1,
-										0 );
-								}
 
-								ClearBusyState();
-								DisplayBooks();
-								downloadProgress.Value = 0;
-							}, 
-						TaskScheduler.FromCurrentSynchronizationContext() );
+			try
+			{
+				using (Downloader downloader = new Downloader())
+				{
+					await downloader.DownloadBooksAsync(products, cacheDirectory.Text, this);
+					MessageBox.Show(
+						"Download completed successfully",
+						Application.ProductName,
+						MessageBoxButtons.OK,
+						MessageBoxIcon.Information,
+						MessageBoxDefaultButton.Button1,
+						0);
+				}
+			}
+			catch ( Exception ex )
+			{
+				MessageBox.Show(
+					$"Download failed - {ex.Message}",
+					Application.ProductName,
+					MessageBoxButtons.OK,
+					MessageBoxIcon.Error,
+					MessageBoxDefaultButton.Button1,
+					0);
+			}
+			finally
+			{
+				ClearBusyState();
+				DisplayBooks();
+				downloadProgress.Value = 0;
+			}
+
 		}
 
 		/// <summary>
@@ -162,7 +159,7 @@
 		/// <param name="e">
 		/// The parameter is not used.
 		/// </param>
-		private void LoadBooksClick( object sender, EventArgs e )
+		private async void LoadBooksClick( object sender, EventArgs e )
 		{
 			string path = ((Locale)languageSelection.SelectedItem).CatalogLink;
 
@@ -170,39 +167,28 @@
 			downloadProgress.Style = ProgressBarStyle.Marquee;
 			startupTip.Visible = false;
 
-			Task.Factory.StartNew(
-				() =>
-					{
-						using ( Downloader downloader = new Downloader() )
-						{
-							return downloader.LoadBooksInformation( path );
-						}
-					} ).ContinueWith(
-						t =>
-							{
-								if ( t.Status == TaskStatus.Faulted )
-								{
-									string message = string.Format(
-										CultureInfo.CurrentCulture,
-										"Failed to retrieve book information - {0}",
-										t.Exception == null ? "Unknown error" : t.Exception.GetBaseException().Message );
-									MessageBox.Show(
-										message,
-										Application.ProductName,
-										MessageBoxButtons.OK,
-										MessageBoxIcon.Error,
-										MessageBoxDefaultButton.Button1,
-										0 );
-								}
-								else
-								{
-									products = t.Result;
-									DisplayBooks();
-								}
-
-								ClearBusyState();
-							}, 
-						TaskScheduler.FromCurrentSynchronizationContext() );
+			try
+			{
+				using (Downloader downloader = new Downloader())
+				{
+					products = await downloader.LoadBooksInformationAsync(path);
+					DisplayBooks();
+				}
+			}
+			catch ( Exception ex )
+			{
+				MessageBox.Show(
+					$"Failed to retrieve book information - {ex.Message}",
+					Application.ProductName,
+					MessageBoxButtons.OK,
+					MessageBoxIcon.Error,
+					MessageBoxDefaultButton.Button1,
+					0);
+			}
+			finally
+			{
+				ClearBusyState();
+			}
 		}
 
 		/// <summary>
@@ -211,8 +197,8 @@
 		private void ClearBusyState()
 		{
 			vsVersion.Enabled = true;
-			languageSelection.Enabled = true;
-			loadBooks.Enabled = true;
+			languageSelection.Enabled = languageSelection.Items.Count > 0;
+			loadBooks.Enabled = languageSelection.Items.Count > 0;
 			downloadBooks.Enabled = (booksList.Items.Count > 0) && !string.IsNullOrEmpty( cacheDirectory.Text );
 			browseDirectory.Enabled = true;
 			downloadProgress.Style = ProgressBarStyle.Continuous;
@@ -370,12 +356,12 @@
 		/// <param name="e">
 		/// The parameter is not used.
 		/// </param>
-		private void VsVersionChanged(object sender, EventArgs e)
+		private async void VsVersionChanged(object sender, EventArgs e)
 		{
 			booksList.Items.Clear();
 			languageSelection.Items.Clear();
 			languageSelection.SelectedItem = -1;
-			UpdateLocales();
+			await UpdateLocalesAsync();
 		}
 	}
 }
